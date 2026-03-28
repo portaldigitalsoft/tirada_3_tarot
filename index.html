@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tirada del Destino ✦ Tarot</title>
+  <style>
+    :root {
+      --primary:      #7c3aed;
+      --primary-dark: #4f46e5;
+      --primary-light:#a78bfa;
+      --primary-pale: #c4b5fd;
+      --glow:         rgba(124, 58, 237, 0.30);
+      --glow-soft:    rgba(124, 58, 237, 0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(160deg, #0b0618 0%, #120b2e 40%, #1a1042 70%, #0d081f 100%);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+    }
+
+    /* ─── Estrellas decorativas ──────────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(200,180,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 60%, rgba(180,160,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 30%, rgba(220,200,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 75%, rgba(160,140,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 20%, rgba(200,180,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 55%, rgba(180,160,255,0.3) 0%, transparent 100%),
+        radial-gradient(2px 2px at 35% 85%, rgba(220,200,255,0.2) 0%, transparent 100%),
+        radial-gradient(2px 2px at 75% 40%, rgba(200,180,255,0.2) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header h1 {
+      font-size: 1.05rem;
+      color: var(--primary-pale);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 16px var(--glow);
+      font-weight: normal;
+    }
+
+    .page-header .estrella {
+      font-size: 1.2rem;
+      margin: 0 0.5rem;
+      opacity: 0.7;
+    }
+
+    /* ─── Widget ─────────────────────────────────────────────────────── */
+    .tarot-container {
+      max-width: 380px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background: rgba(15, 10, 30, 0.92);
+      border-radius: 20px;
+      border: 1px solid var(--primary);
+      box-shadow: 0 0 40px var(--glow), 0 0 80px rgba(79,70,229,0.12);
+      position: relative;
+      z-index: 1;
+    }
+
+    .titulo-principal {
+      font-size: 1.3rem;
+      color: var(--primary-pale);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 0 10px var(--glow);
+    }
+
+    .loader {
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .loader-gif {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 14px;
+      border: 1px solid var(--primary);
+      box-shadow: 0 0 20px var(--glow);
+      display: block;
+    }
+
+    .loader-texto {
+      color: var(--primary-light);
+      font-style: italic;
+      font-size: 0.92rem;
+      animation: pulso 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulso {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 1;   }
+    }
+
+    .carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      min-height: 520px;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .slide {
+      min-width: 100%;
+      padding: 0 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .categoria-badge {
+      display: inline-block;
+      padding: 0.3rem 1.1rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.1rem;
+      color: #fff;
+    }
+    .badge-salud  { background: rgba(124,58,237,0.22);  border: 1px solid #a78bfa; }
+    .badge-amor   { background: rgba(79,70,229,0.22);   border: 1px solid #818cf8; }
+    .badge-dinero { background: rgba(196,181,253,0.15); border: 1px solid #c4b5fd; }
+
+    .nombre-carta {
+      font-size: 1.45rem;
+      color: #fff;
+      text-shadow: 0 0 12px var(--glow);
+      line-height: 1.2;
+    }
+
+    .carta-img {
+      width: 155px;
+      border-radius: 10px;
+      border: 2px solid var(--primary);
+      filter: drop-shadow(0 0 12px var(--glow));
+      transition: transform 0.4s ease;
+      background: #1a1030;
+    }
+    .carta-img:hover { transform: scale(1.04); }
+
+    .img-error {
+      width: 155px;
+      height: 240px;
+      border-radius: 10px;
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glow-soft);
+      color: var(--primary-light);
+      font-size: 3rem;
+    }
+
+    .intro-mistica {
+      font-style: italic;
+      color: var(--primary-pale);
+      font-size: 0.8rem;
+      padding: 0 6px;
+    }
+
+    .significado {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #e2e0f0;
+      padding: 0.5rem 0.75rem;
+      text-align: justify;
+      border-left: 2px solid var(--primary);
+      background: var(--glow-soft);
+      border-radius: 0 8px 8px 0;
+      width: 100%;
+    }
+
+    .recomendacion-bloque {
+      width: 100%;
+      background: rgba(79, 70, 229, 0.12);
+      border: 1px solid var(--primary-light);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+
+    .recomendacion-titulo {
+      font-size: 0.68rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary-pale);
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+
+    .recomendacion-texto {
+      font-size: 0.86rem;
+      line-height: 1.65;
+      color: #ddd8f8;
+      font-style: italic;
+    }
+
+    .nav-flechas {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.8rem;
+      padding: 0 4px;
+    }
+
+    .btn-flecha {
+      background: var(--glow-soft);
+      border: 1px solid var(--primary);
+      color: var(--primary-light);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-flecha:hover    { background: rgba(124,58,237,0.28); }
+    .btn-flecha:disabled { opacity: 0.25; cursor: default; }
+
+    .indicador-texto {
+      font-size: 0.8rem;
+      color: var(--primary-pale);
+      letter-spacing: 1px;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 0.7rem;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3b2d6e;
+      border: 1px solid var(--primary);
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+    .dot.activo { background: var(--primary-light); }
+
+    .disclaimer {
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      color: #9d8ec4;
+      font-style: italic;
+      border-top: 1px solid #2d1f5e;
+      padding-top: 0.7rem;
+      line-height: 1.5;
+    }
+    .disclaimer strong { color: var(--primary-pale); }
+
+    .btn-tarot {
+      margin-top: 1rem;
+      padding: 0.85rem 1.8rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 18px var(--glow);
+      transition: opacity 0.2s;
+      width: 100%;
+    }
+    .btn-tarot:hover { opacity: 0.88; }
+    .btn-tarot:disabled {
+      background: #2a1f4a;
+      color: #5a4d7a;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* ─── Sección de regreso ─────────────────────────────────────────── */
+    .seccion-regreso {
+      max-width: 380px;
+      width: 100%;
+      margin-top: 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .regreso-separador {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.1rem;
+      color: #4a3870;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+    .regreso-separador::before,
+    .regreso-separador::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #3b2d6e, transparent);
+    }
+
+    .regreso-frase {
+      font-size: 0.88rem;
+      color: #b8add4;
+      font-style: italic;
+      margin-bottom: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .btn-regresar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 2rem;
+      background: transparent;
+      color: var(--primary-pale);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 0.9rem;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+      box-shadow: 0 0 12px rgba(124,58,237,0.15);
+    }
+    .btn-regresar:hover {
+      background: rgba(124, 58, 237, 0.18);
+      color: #fff;
+      box-shadow: 0 0 22px var(--glow);
+    }
+    .btn-regresar .flecha { font-size: 1rem; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <h1><span class="estrella">✦</span> Oráculo de las Tres Cartas <span class="estrella">✦</span></h1>
+  </header>
+
+  <div class="tarot-container">
+    <p class="titulo-principal">✦ Tirada del Destino ✦</p>
+
+    <div id="estado-loader" class="loader" role="status" aria-live="polite">
+      <img id="loader-gif" class="loader-gif"
+        src="https://i.ibb.co/TBP8Lxgj/3cartas.gif"
+        alt="Tres cartas de tarot boca abajo moviéndose">
+      <span id="loader-texto" class="loader-texto">Coloca tu mano sobre el cristal y piensa tu pregunta...</span>
+    </div>
+
+    <div id="carousel-area" style="display:none" aria-live="polite">
+      <div class="carousel-wrapper">
+        <div class="carousel-track" id="carousel-track"></div>
+      </div>
+      <div class="nav-flechas">
+        <button class="btn-flecha" id="btn-prev" aria-label="Carta anterior" onclick="moverCarrusel(-1)">&#8592;</button>
+        <span class="indicador-texto" id="indicador-texto">1 / 3</span>
+        <button class="btn-flecha" id="btn-next" aria-label="Carta siguiente" onclick="moverCarrusel(1)">&#8594;</button>
+      </div>
+      <div class="dots" id="dots" role="tablist"></div>
+    </div>
+
+    <p class="disclaimer">
+      <strong>Aviso importante:</strong> Esta tirada es solo una herramienta de entretenimiento.
+      <strong>No reemplaza una visita a tu médico</strong>, terapeuta ni ningún profesional de la salud.
+    </p>
+
+    <button class="btn-tarot" id="btn-consultar" onclick="iniciarTirada()">Consultar Destino</button>
+  </div>
+
+  <!-- ── Sección de regreso ──────────────────────────────────────── -->
+  <section class="seccion-regreso" id="seccion-regreso" style="display:none">
+    <div class="regreso-separador">✦ ✦ ✦</div>
+    <p class="regreso-frase">
+      El Tarot te dio el presente, pero tu Carta Natal revela tu misión de vida. Pedila acá.
+    </p>
+    <a class="btn-regresar" id="btn-regresar" href="#">
+      <span class="flecha">&#8592;</span> TU CARTA NATAL
+    </a>
+  </section>
+
+<script>
+// ── Categorías ────────────────────────────────────────────────────────────
+const categorias = [
+  {
+    id: "salud", label: "Salud", badgeClass: "badge-salud", icono: "🌿",
+    intros: [
+      "Para tu bienestar físico y energético, el universo revela:",
+      "En el plano de tu salud, las cartas susurran:",
+      "Tu cuerpo y tu energía vital hoy te dicen:",
+    ]
+  },
+  {
+    id: "amor", label: "Amor", badgeClass: "badge-amor", icono: "💗",
+    intros: [
+      "En el terreno del corazón y los vínculos, las cartas revelan:",
+      "Para tus relaciones y vida emocional, el mensaje es:",
+      "En el amor, el velo se levanta y muestra:",
+    ]
+  },
+  {
+    id: "dinero", label: "Dinero", badgeClass: "badge-dinero", icono: "✨",
+    intros: [
+      "Para tu abundancia y camino material, el oráculo dice:",
+      "En lo económico y profesional, las energías señalan:",
+      "El flujo de tu prosperidad hoy indica:",
+    ]
+  }
+];
+
+// ── Mazo completo embebido (78 cartas + imágenes de Wikimedia Commons) ────
+const W = "https://upload.wikimedia.org/wikipedia/commons/";
+const MAZO = [
+  // ── Arcanos Mayores ──────────────────────────────────────────────────────
+  { name:"The Fool",            nameEs:"El Loco",                  img:W+"9/90/RWS_Tarot_00_Fool.jpg" },
+  { name:"The Magician",        nameEs:"El Mago",                  img:W+"d/de/RWS_Tarot_01_Magician.jpg" },
+  { name:"The High Priestess",  nameEs:"La Sacerdotisa",           img:W+"8/88/RWS_Tarot_02_High_Priestess.jpg" },
+  { name:"The Empress",         nameEs:"La Emperatriz",            img:W+"d/d2/RWS_Tarot_03_Empress.jpg" },
+  { name:"The Emperor",         nameEs:"El Emperador",             img:W+"c/c3/RWS_Tarot_04_Emperor.jpg" },
+  { name:"The Hierophant",      nameEs:"El Sumo Sacerdote",        img:W+"8/8d/RWS_Tarot_05_Hierophant.jpg" },
+  { name:"The Lovers",          nameEs:"Los Enamorados",           img:W+"d/db/RWS_Tarot_06_Lovers.jpg" },
+  { name:"The Chariot",         nameEs:"El Carro",                 img:W+"9/9b/RWS_Tarot_07_Chariot.jpg" },
+  { name:"Strength",            nameEs:"La Fuerza",                img:W+"f/f5/RWS_Tarot_08_Strength.jpg" },
+  { name:"The Hermit",          nameEs:"El Ermitaño",              img:W+"4/4d/RWS_Tarot_09_Hermit.jpg" },
+  { name:"Wheel of Fortune",    nameEs:"La Rueda de la Fortuna",   img:W+"3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg" },
+  { name:"Justice",             nameEs:"La Justicia",              img:W+"e/e0/RWS_Tarot_11_Justice.jpg" },
+  { name:"The Hanged Man",      nameEs:"El Colgado",               img:W+"2/2b/RWS_Tarot_12_Hanged_Man.jpg" },
+  { name:"Death",               nameEs:"La Muerte",                img:W+"d/d7/RWS_Tarot_13_Death.jpg" },
+  { name:"Temperance",          nameEs:"La Templanza",             img:W+"f/f8/RWS_Tarot_14_Temperance.jpg" },
+  { name:"The Devil",           nameEs:"El Diablo",                img:W+"5/55/RWS_Tarot_15_Devil.jpg" },
+  { name:"The Tower",           nameEs:"La Torre",                 img:W+"5/53/RWS_Tarot_16_Tower.jpg" },
+  { name:"The Star",            nameEs:"La Estrella",              img:W+"d/db/RWS_Tarot_17_Star.jpg" },
+  { name:"The Moon",            nameEs:"La Luna",                  img:W+"7/7f/RWS_Tarot_18_Moon.jpg" },
+  { name:"The Sun",             nameEs:"El Sol",                   img:W+"1/17/RWS_Tarot_19_Sun.jpg" },
+  { name:"Judgement",           nameEs:"El Juicio",                img:W+"d/dd/RWS_Tarot_20_Judgement.jpg" },
+  { name:"The World",           nameEs:"El Mundo",                 img:W+"f/ff/RWS_Tarot_21_World.jpg" },
+  // ── Bastos (Wands) ───────────────────────────────────────────────────────
+  { name:"Ace of Wands",        nameEs:"As de Bastos",             img:W+"1/11/Wands01.jpg" },
+  { name:"Two of Wands",        nameEs:"Dos de Bastos",            img:W+"0/0f/Wands02.jpg" },
+  { name:"Three of Wands",      nameEs:"Tres de Bastos",           img:W+"f/ff/Wands03.jpg" },
+  { name:"Four of Wands",       nameEs:"Cuatro de Bastos",         img:W+"a/a4/Wands04.jpg" },
+  { name:"Five of Wands",       nameEs:"Cinco de Bastos",          img:W+"9/9d/Wands05.jpg" },
+  { name:"Six of Wands",        nameEs:"Seis de Bastos",           img:W+"3/3b/Wands06.jpg" },
+  { name:"Seven of Wands",      nameEs:"Siete de Bastos",          img:W+"e/e4/Wands07.jpg" },
+  { name:"Eight of Wands",      nameEs:"Ocho de Bastos",           img:W+"6/6b/Wands08.jpg" },
+  { name:"Nine of Wands",       nameEs:"Nueve de Bastos",          img:W+"4/4d/Tarot_Nine_of_Wands.jpg" },
+  { name:"Ten of Wands",        nameEs:"Diez de Bastos",           img:W+"0/0b/Wands10.jpg" },
+  { name:"Page of Wands",       nameEs:"Sota de Bastos",           img:W+"6/6a/Wands11.jpg" },
+  { name:"Knight of Wands",     nameEs:"Caballero de Bastos",      img:W+"1/16/Wands12.jpg" },
+  { name:"Queen of Wands",      nameEs:"Reina de Bastos",          img:W+"0/0d/Wands13.jpg" },
+  { name:"King of Wands",       nameEs:"Rey de Bastos",            img:W+"c/ce/Wands14.jpg" },
+  // ── Copas (Cups) ─────────────────────────────────────────────────────────
+  { name:"Ace of Cups",         nameEs:"As de Copas",              img:W+"3/36/Cups01.jpg" },
+  { name:"Two of Cups",         nameEs:"Dos de Copas",             img:W+"f/f8/Cups02.jpg" },
+  { name:"Three of Cups",       nameEs:"Tres de Copas",            img:W+"7/7a/Cups03.jpg" },
+  { name:"Four of Cups",        nameEs:"Cuatro de Copas",          img:W+"3/35/Cups04.jpg" },
+  { name:"Five of Cups",        nameEs:"Cinco de Copas",           img:W+"d/d7/Cups05.jpg" },
+  { name:"Six of Cups",         nameEs:"Seis de Copas",            img:W+"1/17/Cups06.jpg" },
+  { name:"Seven of Cups",       nameEs:"Siete de Copas",           img:W+"a/ae/Cups07.jpg" },
+  { name:"Eight of Cups",       nameEs:"Ocho de Copas",            img:W+"6/60/Cups08.jpg" },
+  { name:"Nine of Cups",        nameEs:"Nueve de Copas",           img:W+"2/24/Cups09.jpg" },
+  { name:"Ten of Cups",         nameEs:"Diez de Copas",            img:W+"8/84/Cups10.jpg" },
+  { name:"Page of Cups",        nameEs:"Sota de Copas",            img:W+"a/ad/Cups11.jpg" },
+  { name:"Knight of Cups",      nameEs:"Caballero de Copas",       img:W+"f/fa/Cups12.jpg" },
+  { name:"Queen of Cups",       nameEs:"Reina de Copas",           img:W+"6/62/Cups13.jpg" },
+  { name:"King of Cups",        nameEs:"Rey de Copas",             img:W+"0/04/Cups14.jpg" },
+  // ── Espadas (Swords) ─────────────────────────────────────────────────────
+  { name:"Ace of Swords",       nameEs:"As de Espadas",            img:W+"1/1a/Swords01.jpg" },
+  { name:"Two of Swords",       nameEs:"Dos de Espadas",           img:W+"9/9e/Swords02.jpg" },
+  { name:"Three of Swords",     nameEs:"Tres de Espadas",          img:W+"0/02/Swords03.jpg" },
+  { name:"Four of Swords",      nameEs:"Cuatro de Espadas",        img:W+"b/bf/Swords04.jpg" },
+  { name:"Five of Swords",      nameEs:"Cinco de Espadas",         img:W+"2/23/Swords05.jpg" },
+  { name:"Six of Swords",       nameEs:"Seis de Espadas",          img:W+"2/29/Swords06.jpg" },
+  { name:"Seven of Swords",     nameEs:"Siete de Espadas",         img:W+"3/34/Swords07.jpg" },
+  { name:"Eight of Swords",     nameEs:"Ocho de Espadas",          img:W+"a/a7/Swords08.jpg" },
+  { name:"Nine of Swords",      nameEs:"Nueve de Espadas",         img:W+"2/2f/Swords09.jpg" },
+  { name:"Ten of Swords",       nameEs:"Diez de Espadas",          img:W+"d/d4/Swords10.jpg" },
+  { name:"Page of Swords",      nameEs:"Sota de Espadas",          img:W+"4/4c/Swords11.jpg" },
+  { name:"Knight of Swords",    nameEs:"Caballero de Espadas",     img:W+"b/b0/Swords12.jpg" },
+  { name:"Queen of Swords",     nameEs:"Reina de Espadas",         img:W+"d/d4/Swords13.jpg" },
+  { name:"King of Swords",      nameEs:"Rey de Espadas",           img:W+"3/33/Swords14.jpg" },
+  // ── Oros (Pentacles) ─────────────────────────────────────────────────────
+  { name:"Ace of Pentacles",    nameEs:"As de Oros",               img:W+"f/fd/Pents01.jpg" },
+  { name:"Two of Pentacles",    nameEs:"Dos de Oros",              img:W+"9/9f/Pents02.jpg" },
+  { name:"Three of Pentacles",  nameEs:"Tres de Oros",             img:W+"4/42/Pents03.jpg" },
+  { name:"Four of Pentacles",   nameEs:"Cuatro de Oros",           img:W+"3/35/Pents04.jpg" },
+  { name:"Five of Pentacles",   nameEs:"Cinco de Oros",            img:W+"9/96/Pents05.jpg" },
+  { name:"Six of Pentacles",    nameEs:"Seis de Oros",             img:W+"a/a6/Pents06.jpg" },
+  { name:"Seven of Pentacles",  nameEs:"Siete de Oros",            img:W+"6/6a/Pents07.jpg" },
+  { name:"Eight of Pentacles",  nameEs:"Ocho de Oros",             img:W+"4/49/Pents08.jpg" },
+  { name:"Nine of Pentacles",   nameEs:"Nueve de Oros",            img:W+"f/f0/Pents09.jpg" },
+  { name:"Ten of Pentacles",    nameEs:"Diez de Oros",             img:W+"4/42/Pents10.jpg" },
+  { name:"Page of Pentacles",   nameEs:"Sota de Oros",             img:W+"e/ec/Pents11.jpg" },
+  { name:"Knight of Pentacles", nameEs:"Caballero de Oros",        img:W+"d/d5/Pents12.jpg" },
+  { name:"Queen of Pentacles",  nameEs:"Reina de Oros",            img:W+"8/88/Pents13.jpg" },
+  { name:"King of Pentacles",   nameEs:"Rey de Oros",              img:W+"1/1c/Pents14.jpg" },
+];
+
+// ── Mezcla aleatoria (Fisher-Yates) ──────────────────────────────────────
+function barajar(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Diccionario de recomendaciones (78 cartas × 3 categorías) ─────────────
+const recomendaciones = {
+  "The Fool": {
+    salud:  "Un nuevo comienzo se abre ante ti. Escucha tu cuerpo con ojos frescos, sin juicios ni hábitos viejos. Considera adoptar una rutina de bienestar que nunca hayas probado.",
+    amor:   "El amor llega de formas inesperadas. Abre tu corazón sin miedo a lo desconocido; la espontaneidad puede ser tu mayor aliado sentimental ahora.",
+    dinero: "Una oportunidad nueva asoma en el horizonte. No la descartes por parecerte inusual; la innovación y el riesgo calculado pueden abrirte puertas económicas frescas."
+  },
+  "The Magician": {
+    salud:  "Tienes todas las herramientas para mejorar tu bienestar. Concentra tu voluntad y pon en práctica lo que ya sabes; la disciplina es tu medicina más potente.",
+    amor:   "Tu magnetismo personal está en su punto más alto. Comunica lo que sientes con claridad y confianza; tienes el poder de transformar tus vínculos.",
+    dinero: "Las habilidades que posees son tu mayor capital. Es momento de hacer visible tu talento y monetizar lo que ya dominas con maestría."
+  },
+  "The High Priestess": {
+    salud:  "Tu cuerpo te habla a través de señales sutiles. Presta atención a la intuición y no ignores síntomas silenciosos; la escucha interior es clave para tu bienestar.",
+    amor:   "No todo lo que sientes necesita ser dicho ahora. Hay una verdad profunda en tu vínculo que se revelará con paciencia; confía en tu intuición emocional.",
+    dinero: "La información que tienes es más valiosa de lo que crees. Antes de actuar, investiga en profundidad; el conocimiento oculto te dará ventaja financiera."
+  },
+  "The Empress": {
+    salud:  "Cuídate con la misma ternura que darías a alguien amado. Nutrir tu cuerpo con alimentos naturales, descanso y contacto con la naturaleza será altamente beneficioso.",
+    amor:   "La abundancia emocional te rodea. Es un momento fértil para profundizar vínculos, expresar afecto y dejarte recibir el amor que mereces.",
+    dinero: "La prosperidad crece cuando la cuidas con paciencia. Invierte en proyectos a largo plazo, especialmente aquellos relacionados con la creatividad o la naturaleza."
+  },
+  "The Emperor": {
+    salud:  "La estructura y la disciplina son tus mejores aliados. Establece rutinas sólidas y sé consistente; la constancia hará más por tu salud que cualquier solución rápida.",
+    amor:   "Aportar estabilidad y presencia genuina fortalecerá tus relaciones. Si buscas pareja, muestra tu solidez; si ya la tienes, reafirma tus compromisos.",
+    dinero: "Es momento de tomar el control de tus finanzas con estrategia. Define un presupuesto, establece metas claras y actúa con autoridad sobre tus recursos."
+  },
+  "The Hierophant": {
+    salud:  "Consultar a un profesional de confianza será clave en este momento. No desestimes el valor de la medicina tradicional ni de las prácticas probadas para tu bienestar.",
+    amor:   "Los valores compartidos son la base de una relación duradera. Reflexiona si tus vínculos actuales están alineados con lo que realmente crees y valoras.",
+    dinero: "Seguir métodos probados y confiables te traerá más seguridad económica. Asesórate con alguien con experiencia antes de tomar decisiones importantes."
+  },
+  "The Lovers": {
+    salud:  "Las decisiones que tomes hoy sobre tu cuerpo tendrán consecuencias a largo plazo. Elige con consciencia entre lo que te hace bien y lo que solo parece placentero.",
+    amor:   "Un momento de elección importante en el amor se aproxima. Actúa desde el corazón y la honestidad; la autenticidad es el camino hacia una conexión verdadera.",
+    dinero: "Ante una decisión económica importante, no dejes que el miedo te paralice. Evalúa tus opciones con claridad y elige la que esté más alineada con tus valores."
+  },
+  "The Chariot": {
+    salud:  "La fuerza de voluntad es tu medicina más poderosa ahora. Mantén el enfoque en tus metas de bienestar y no cedas ante los obstáculos; la victoria está cerca.",
+    amor:   "El esfuerzo que pones en tu relación dará sus frutos. Si hay conflictos, afróntelos con determinación y sin huir; el amor que persiste vale la pena.",
+    dinero: "Estás en un momento de impulso y avance profesional. Mantén el rumbo con confianza; los esfuerzos sostenidos están a punto de convertirse en logros concretos."
+  },
+  "Strength": {
+    salud:  "La fortaleza interior es tu mejor recurso de sanación. Domina los hábitos negativos desde el amor propio, no desde el castigo; la compasión también cura.",
+    amor:   "La paciencia y la ternura son tu fuerza más poderosa en el amor. No necesitas imponer; cuando actúas desde la dulzura, transformas cualquier vínculo.",
+    dinero: "La perseverancia silenciosa te llevará más lejos que los movimientos bruscos. Sigue adelante con calma; tu determinación está construyendo una base sólida."
+  },
+  "The Hermit": {
+    salud:  "Un período de retiro y descanso profundo hará maravillas por tu cuerpo. No subestimes el poder de la soledad consciente para regenerarte.",
+    amor:   "Antes de buscar amor afuera, busca claridad adentro. Un tiempo de reflexión sobre lo que realmente necesitas en pareja te guiará hacia vínculos más auténticos.",
+    dinero: "La reflexión antes de la acción te salvará de errores costosos. Tómate el tiempo necesario para evaluar tu situación financiera con profundidad."
+  },
+  "Wheel of Fortune": {
+    salud:  "Un cambio en tu ciclo de salud está en marcha. Aprovecha los momentos de energía cuando aparezcan y descansa cuando el ciclo lo pida; fluye con la rueda.",
+    amor:   "El destino favorece los encuentros inesperados ahora. Permanece abierto a las sorpresas del corazón; lo que parece azar puede ser una oportunidad única.",
+    dinero: "La fortuna está girando a tu favor. Estate atento a oportunidades que aparecen de pronto; la rapidez de acción será tu ventaja en este ciclo."
+  },
+  "Justice": {
+    salud:  "El equilibrio en tus hábitos es el mensaje central. Revisa si estás siendo justo contigo mismo en cuanto a descanso, alimentación y ejercicio.",
+    amor:   "La honestidad y la equidad son fundamentales en tus relaciones ahora. Si algo no está en equilibrio, es momento de ponerlo en la balanza y actuar con justicia.",
+    dinero: "Revisar contratos, deudas y acuerdos económicos es prioritario. Actúa con integridad en todas tus transacciones; lo que se da con justicia, regresa con justicia."
+  },
+  "The Hanged Man": {
+    salud:  "Una pausa obligada puede ser la mayor cura. En lugar de resistir el descanso, úsalo para ver tu salud desde una perspectiva completamente nueva.",
+    amor:   "Soltar el control es el acto de amor más profundo que puedes hacer ahora. La espera consciente te revelará verdades que la urgencia nunca te dejaría ver.",
+    dinero: "No es el momento de actuar, sino de observar. Suspende decisiones económicas importantes y usa este tiempo para replantear tu estrategia desde otra perspectiva."
+  },
+  "Death": {
+    salud:  "Un hábito que ya no te sirve debe terminar. No temas el fin de viejas rutinas; la transformación que viene traerá una versión más saludable de ti.",
+    amor:   "Un ciclo en el amor está llegando a su fin para dar lugar a algo nuevo. Acepta el cierre con gratitud; lo que termina abre espacio para lo que debe llegar.",
+    dinero: "Cierra ciclos económicos que ya no tienen futuro. Soltar lo que ya no produce resultados liberará energía y recursos para nuevas oportunidades financieras."
+  },
+  "Temperance": {
+    salud:  "La moderación es tu mejor medicina. Encuentra el punto medio entre el esfuerzo y el descanso, entre el rigor y la flexibilidad; el equilibrio sanará.",
+    amor:   "La paciencia y la armonía son las claves de tu vida amorosa ahora. No fuerces los procesos; permite que la relación fluya a su ritmo natural.",
+    dinero: "Gestiona tus recursos con moderación y visión a largo plazo. Evita los extremos; un plan financiero equilibrado y sostenible es tu camino a la estabilidad."
+  },
+  "The Devil": {
+    salud:  "Hay un hábito o patrón que te tiene atado y que afecta tu bienestar. Reconocerlo es el primer paso para liberarte; tienes más poder del que crees.",
+    amor:   "Examina si hay dependencias emocionales o dinámicas de control en tus vínculos. La libertad comienza cuando eliges relacionarte desde el amor y no desde el miedo.",
+    dinero: "Cuidado con compromisos financieros que se sienten como trampas. Revisa deudas, contratos o hábitos de consumo que te tienen encadenado a una situación que no deseas."
+  },
+  "The Tower": {
+    salud:  "Una crisis de salud puede ser una llamada de atención valiosa. Lo que se derrumba es lo que ya no servía; del caos puede surgir una base de bienestar mucho más sólida.",
+    amor:   "Una revelación inesperada puede sacudir tus cimientos sentimentales. Lo que se rompe con la verdad era una ilusión; la honestidad, aunque duele, libera.",
+    dinero: "Una situación financiera puede colapsar repentinamente. Prepárate para lo inesperado teniendo reservas y flexibilidad; de cada crisis surge una reconstrucción más inteligente."
+  },
+  "The Star": {
+    salud:  "La esperanza y la fe en tu proceso de recuperación son poderosas. Este es un momento de renovación; confía en que tu cuerpo tiene la sabiduría para sanarse.",
+    amor:   "Después de la tormenta, la serenidad llega al amor. Hay una luz de esperanza brillando sobre tus vínculos; ábrete a recibir con el corazón limpio.",
+    dinero: "La situación económica tiene una luz al final del túnel. La esperanza bien dirigida, junto con acciones concretas, te llevará hacia la estabilidad que buscas."
+  },
+  "The Moon": {
+    salud:  "Las emociones reprimidas pueden manifestarse en el cuerpo. Presta atención a lo que tu inconsciente te comunica a través de sueños o sensaciones físicas.",
+    amor:   "No todo en esta relación está siendo dicho o mostrado. Hay algo oculto que necesita salir a la luz; confía en tu intuición si algo no te cierra.",
+    dinero: "Las apariencias engañan en el terreno económico ahora. No tomes decisiones basadas en información incompleta; espera a tener mayor claridad antes de actuar."
+  },
+  "The Sun": {
+    salud:  "Tu vitalidad está en su punto más brillante. Aprovecha esta energía para adoptar nuevos hábitos saludables; tu cuerpo responde positivamente a todo lo que hagas ahora.",
+    amor:   "La alegría y la autenticidad son el alma de tus relaciones en este momento. El amor fluye con facilidad; disfrútalo y comparte tu luz con quien tienes cerca.",
+    dinero: "El éxito y la abundancia brillan sobre tus proyectos. Es un momento favorable para avanzar con optimismo; tus esfuerzos están siendo recompensados."
+  },
+  "Judgement": {
+    salud:  "Escucha el llamado de tu cuerpo hacia una transformación profunda. Es momento de cerrar viejos patrones de salud y renacer con hábitos que realmente te sostengan.",
+    amor:   "Una evaluación honesta de tus relaciones es necesaria. Perdona, cierra ciclos y ábrete a un nuevo capítulo sentimental con mayor conciencia y madurez.",
+    dinero: "Es tiempo de evaluar tus decisiones financieras pasadas y aprender de ellas. Un nuevo ciclo económico se abre; entra en él con mayor sabiduría y claridad de propósito."
+  },
+  "The World": {
+    salud:  "Has completado un ciclo importante en tu proceso de bienestar. Celebra tus logros y prepárate para un nuevo comienzo desde un lugar de plenitud y equilibrio.",
+    amor:   "Una etapa de plenitud y realización en el amor está presente. Disfruta de la armonía que has construido; eres capaz de crear vínculos completos y satisfactorios.",
+    dinero: "Un ciclo de esfuerzo llega a su culminación exitosa. Los frutos de tu trabajo están listos para ser cosechados; es momento de reconocer y celebrar tu prosperidad."
+  },
+  "Ace of Wands": {
+    salud:  "Una chispa de energía vital llega para renovarte. Inicia esa actividad física o proyecto de bienestar que has estado postergando; el momento es ahora.",
+    amor:   "Una nueva pasión o el reavivamiento del fuego en tu relación está en puerta. Sigue el impulso del corazón con entusiasmo y sin dudar.",
+    dinero: "Una idea brillante o un nuevo proyecto profesional viene cargado de potencial. No lo dejes pasar; es el momento de encender ese emprendimiento que tienes en mente."
+  },
+  "Two of Wands": {
+    salud:  "Planifica tu bienestar con visión de largo plazo. No te conformes con resultados inmediatos; diseña un plan de salud sostenible que te lleve más lejos.",
+    amor:   "Tienes la posibilidad de expandir tu vida amorosa más allá de lo conocido. Si estás en pareja, exploren nuevos horizontes juntos; si estás solo, amplía tu círculo.",
+    dinero: "La planificación estratégica es tu mejor herramienta ahora. Mira el panorama completo antes de decidir; las oportunidades de crecimiento están en el horizonte."
+  },
+  "Three of Wands": {
+    salud:  "Los esfuerzos que has hecho por tu bienestar empiezan a dar frutos visibles. Mantén la constancia; lo que sembraste con disciplina está comenzando a florecer.",
+    amor:   "La expansión de tus vínculos llega de lugares inesperados. Confía en el futuro de tus relaciones; los frutos del amor paciente están madurando.",
+    dinero: "Tus inversiones o proyectos lanzados anteriormente comienzan a generar resultados. Es momento de expandirte; el mercado está receptivo a lo que tienes para ofrecer."
+  },
+  "Four of Wands": {
+    salud:  "Celebra los avances que has logrado en tu bienestar. Un momento de pausa para disfrutar lo conseguido recarga las energías para seguir adelante con alegría.",
+    amor:   "La armonía y la celebración están presentes en tu vida amorosa. Es un momento ideal para formalizar, comprometerse o simplemente festejar lo construido juntos.",
+    dinero: "Un logro económico merece ser reconocido. La estabilidad que estás construyendo es real; consolida lo ganado antes de dar el siguiente paso."
+  },
+  "Five of Wands": {
+    salud:  "El estrés y la tensión interna pueden estar afectando tu bienestar físico. Busca formas de canalizar la energía competitiva hacia actividades que te nutran en lugar de agotarte.",
+    amor:   "Hay fricciones o malentendidos en el aire. En lugar de competir con tu pareja, busquen resolver los conflictos como equipo; la comunicación es la clave.",
+    dinero: "La competencia en el entorno laboral se intensifica. Mantén la calma y diferénciate con calidad; la agresividad no es tu mejor estrategia ahora."
+  },
+  "Six of Wands": {
+    salud:  "El reconocimiento de tu esfuerzo físico llega con merecida satisfacción. Celebra los progresos de tu cuerpo; el éxito en la salud también merece ser festejado.",
+    amor:   "Tu confianza y carisma atraen admiración en el plano amoroso. Es un momento de brillo personal; muéstrate tal como eres sin temor a ser visto.",
+    dinero: "El éxito profesional y el reconocimiento económico están llegando. Acepta los elogios y las recompensas con confianza; tus logros son genuinos."
+  },
+  "Seven of Wands": {
+    salud:  "Defiende tus hábitos saludables aunque el entorno no los apoye. Mantener tus rutinas de bienestar ante las presiones externas es un acto de amor propio fundamental.",
+    amor:   "Tu relación puede estar bajo presión externa o cuestionada por otros. Defiende lo que has construido con convicción; no todos tienen que entender lo que sientes.",
+    dinero: "Tu posición económica puede estar siendo desafiada. Mantén firme tu estrategia y defiende lo que has logrado; la perseverancia ante la adversidad te distingue."
+  },
+  "Eight of Wands": {
+    salud:  "La energía fluye con rapidez y todo avanza. Aprovecha este impulso para iniciar o intensificar rutinas de bienestar; el momento de actuar es ahora.",
+    amor:   "Una comunicación esperada puede materializarse pronto. Estate abierto a la rapidez con que puede evolucionar tu vida sentimental; las noticias llegan velozmente.",
+    dinero: "Los proyectos avanzan con velocidad inusual. Mantente ágil y preparado para tomar decisiones rápidas; las oportunidades pasarán rápido si no actúas."
+  },
+  "Nine of Wands": {
+    salud:  "Estás cansado pero más cerca de la meta de lo que crees. No te rindas ahora; un último esfuerzo consciente consolidará los avances de bienestar que tanto te costaron.",
+    amor:   "Las experiencias pasadas te han hecho cauteloso, y eso es válido. Pero no dejes que las heridas viejas te impidan recibir el amor que está disponible para ti ahora.",
+    dinero: "Has llegado lejos y el agotamiento es real, pero la línea de llegada está cerca. Mantén la guardia y protege lo que has construido; el esfuerzo está a punto de valer la pena."
+  },
+  "Ten of Wands": {
+    salud:  "Cargas demasiado solo. Aprender a delegar responsabilidades y pedir ayuda cuando la necesitas es esencial para recuperar tu energía vital.",
+    amor:   "El peso de las responsabilidades puede estar afectando tu vida amorosa. Revisa qué cargas no son tuyas y suéltalas; una relación no puede florecer bajo el agotamiento constante.",
+    dinero: "Estás asumiendo más de lo que puedes sostener económicamente o laboralmente. Delega, reorganiza y suelta lo que ya no puedes cargar solo; la sobrecarga no es señal de éxito."
+  },
+  "Page of Wands": {
+    salud:  "La curiosidad es tu medicina ahora. Explora nuevas formas de moverte, alimentarte o cuidarte; la energía experimentadora te traerá vitalidad renovada.",
+    amor:   "Un mensaje o encuentro inesperado puede encender algo nuevo. Sé curioso y abierto en el amor; la espontaneidad es tu mayor atractivo en este momento.",
+    dinero: "Una idea o propuesta nueva llega con entusiasmo. Evalúala con atención antes de comprometerte, pero no apagues la chispa; puede ser el inicio de algo valioso."
+  },
+  "Knight of Wands": {
+    salud:  "Tu energía es abundante pero puede dispersarse fácilmente. Canaliza ese fuego interior hacia rutinas físicas concretas; el movimiento intenso te hará muy bien ahora.",
+    amor:   "La pasión es intensa pero puede carecer de dirección. Si buscas algo duradero, acompaña el fuego con intención; si buscas aventura, disfrútala con honestidad.",
+    dinero: "La ambición y la velocidad te impulsan, pero cuidado con los riesgos impulsivos. Actúa con entusiasmo pero con un plan; la energía sin estrategia puede dispersarse."
+  },
+  "Queen of Wands": {
+    salud:  "Tu vitalidad y carisma son contagiosos. Canalizalos hacia el autocuidado con la misma pasión que pones en los demás; mereces tu propia energía de vuelta.",
+    amor:   "Irradias atractivo y confianza en el terreno amoroso. Sé tú mismo sin filtros; tu autenticidad es lo que más seduce y conecta profundamente.",
+    dinero: "Tu liderazgo natural y tu creatividad son tus mayores activos profesionales. Confía en tu visión y lleva tus proyectos adelante con la confianza de quien sabe lo que vale."
+  },
+  "King of Wands": {
+    salud:  "Tu carácter fuerte puede llevarte a excesos. Recuerda que el descanso también es parte del rendimiento; los líderes más poderosos saben cuándo parar y recuperarse.",
+    amor:   "Aportas pasión, visión y liderazgo a tus relaciones. Asegúrate de escuchar tanto como hablas; el amor también necesita espacio para la voz del otro.",
+    dinero: "Tienes la visión y el carisma para llevar proyectos grandes adelante. Es momento de asumir el liderazgo con audacia; tu influencia puede transformar tu situación económica."
+  },
+  "Ace of Cups": {
+    salud:  "Un comienzo emocional fresco tiene efectos directos en tu bienestar. Abrir el corazón a la alegría y al amor propio es uno de los remedios más poderosos que existen.",
+    amor:   "Un nuevo amor o la renovación de uno existente llega con toda su frescura. Recibe este regalo con el corazón abierto; el amor es abundante y está disponible para ti.",
+    dinero: "Las oportunidades que fluyen desde la emoción y la creatividad son muy prometedoras. Proyectos ligados al arte, la ayuda o la conexión humana tienen mucho potencial ahora."
+  },
+  "Two of Cups": {
+    salud:  "La armonía en tus relaciones tiene un impacto directo en tu salud. Cultivar vínculos equilibrados y nutritivos es una de las mejores inversiones para tu bienestar.",
+    amor:   "Una conexión profunda y recíproca está presente o en camino. Celebra la unión; este es uno de los momentos más favorables para el amor verdadero.",
+    dinero: "Una alianza o sociedad puede ser muy fructífera ahora. Busca colaboradores con quienes compartas visión y valores; juntos pueden lograr más que por separado."
+  },
+  "Three of Cups": {
+    salud:  "La alegría compartida tiene efectos sanadores reales. Rodearte de personas que te quieren y celebrar los momentos cotidianos es un bálsamo poderoso para tu cuerpo.",
+    amor:   "La celebración, la amistad y el amor se entrelazan. Disfruta de los vínculos que tienes; la abundancia emocional que te rodea es un regalo que merece ser valorado.",
+    dinero: "Celebrar los logros con tu equipo o comunidad multiplica la energía positiva. Las redes de apoyo y colaboración serán clave para tu prosperidad en este período."
+  },
+  "Four of Cups": {
+    salud:  "El aislamiento emocional puede estar pasando factura en tu cuerpo. Intenta salir de la introspección excesiva y reconectar con actividades y personas que te nutran.",
+    amor:   "Estás tan enfocado en lo que no tienes que no ves lo que ya está disponible. Hay oportunidades de conexión frente a ti que mereces explorar con ojos frescos.",
+    dinero: "La apatía o el descontento pueden hacerte perder oportunidades económicas. Abre los ojos a lo que ya tienes y a las opciones que esperan ser vistas."
+  },
+  "Five of Cups": {
+    salud:  "El dolor emocional no procesado puede manifestarse físicamente. Permite el duelo pero no te quedes en él; la sanación comienza cuando decides mirar lo que aún te queda.",
+    amor:   "La tristeza por lo perdido es válida, pero el amor no ha terminado para ti. Hay vínculos valiosos que merecen tu atención; no cierres el corazón por lo que fue.",
+    dinero: "Una pérdida económica reciente puede estar nublando tu visión. Evalúa con calma lo que todavía conservas y qué puedes construir a partir de allí."
+  },
+  "Six of Cups": {
+    salud:  "Los recuerdos y la nostalgia pueden estar influyendo en tu estado físico y emocional. Conectar con actividades que hacías antes puede ser profundamente restaurador.",
+    amor:   "Un amor del pasado o una conexión inocente y genuina vuelve a cobrar relevancia. Revisa con ternura tu historia amorosa; hay algo valioso que merece ser revisitado.",
+    dinero: "Las habilidades o talentos que desarrollaste en el pasado tienen valor económico ahora. Rescata lo que sabías hacer con alegría; puede ser una fuente de ingreso inesperada."
+  },
+  "Seven of Cups": {
+    salud:  "Demasiadas opciones o ilusiones pueden generar confusión y ansiedad. Enfócate en una sola práctica de bienestar comprobada en lugar de saltar de método en método.",
+    amor:   "El terreno amoroso está lleno de fantasías pero poco de realidad. Asegúrate de ver a las personas tal como son y no como deseas que sean.",
+    dinero: "Hay muchas opciones tentadoras pero poca claridad. Evita dispersarte o dejarte llevar por promesas irreales; analiza con cabeza fría antes de comprometer recursos."
+  },
+  "Eight of Cups": {
+    salud:  "Algo en tu vida que ya no te nutre necesita ser soltado. Alejarte de lo que drena tu energía, aunque duela, es un acto de profundo autocuidado.",
+    amor:   "Sentir que algo en tu relación ya no tiene sentido es una señal válida. A veces el amor más grande es reconocer cuando es hora de partir hacia algo más auténtico.",
+    dinero: "Hay una situación económica o laboral que ya no tiene más que ofrecerte. Alejarte con dignidad de lo que ya no crece es el primer paso hacia algo mejor."
+  },
+  "Nine of Cups": {
+    salud:  "Tus deseos de bienestar están a punto de materializarse. Este es un momento de satisfacción; disfruta de lo que has logrado y sigue nutriendo tu cuerpo con gratitud.",
+    amor:   "La carta del deseo cumplido: lo que has pedido en el amor está cerca de manifestarse. Abre el corazón con confianza y recibe la satisfacción que mereces.",
+    dinero: "La satisfacción material y económica está al alcance de tu mano. Los deseos que has cultivado con esfuerzo están a punto de convertirse en realidad."
+  },
+  "Ten of Cups": {
+    salud:  "La plenitud emocional y la armonía familiar tienen un efecto profundamente sanador. Cuando hay paz en el corazón, el cuerpo lo siente; cultiva ese equilibrio.",
+    amor:   "La realización plena en el amor y la familia está presente. Este es un momento de bendición en tus vínculos; celebra y cuida lo que has construido con tanto amor.",
+    dinero: "La armonía entre trabajo, familia y vida personal está generando abundancia real. No sacrifiques el bienestar relacional por el económico; ambos pueden florecer juntos."
+  },
+  "Page of Cups": {
+    salud:  "Escucha los mensajes sutiles que tu cuerpo y tus emociones te envían. La sensibilidad es un don; úsala para detectar tempranamente lo que necesitas sanar.",
+    amor:   "Un mensaje o gesto romántico inesperado puede llegar. Mantén el corazón abierto y permite que el amor se exprese de formas tiernas y sorprendentes.",
+    dinero: "Una propuesta creativa o intuitiva puede tener más valor del que aparenta. No desestimes las ideas que llegan de tu mundo interior; a veces la intuición sabe más que el análisis."
+  },
+  "Knight of Cups": {
+    salud:  "Tus emociones y tu cuerpo están profundamente conectados ahora. Actividades como yoga, danza o meditación que unan el movimiento con la emoción serán especialmente beneficiosas.",
+    amor:   "El romance florece con gestos poéticos y sinceros. Si sientes algo, exprésalo con valentía y ternura; el amor que se declara tiene más poder que el que se guarda.",
+    dinero: "Sigue tu intuición en los negocios, pero no olvides revisar los detalles prácticos. Las ideas inspiradas son valiosas cuando están bien fundamentadas."
+  },
+  "Queen of Cups": {
+    salud:  "Tu alta sensibilidad emocional necesita ser protegida. Crea límites saludables, date tiempo de silencio y cuida tu mundo interior con la misma ternura con que cuidas a otros.",
+    amor:   "Tu capacidad de amar profundamente es tu mayor regalo. Asegúrate de que ese amor también regrese a ti en la misma medida; mereces lo que das.",
+    dinero: "Tu intuición sobre personas y situaciones es altamente confiable ahora. Confía en esa voz interior para tomar decisiones económicas; tu sensibilidad también es un activo."
+  },
+  "King of Cups": {
+    salud:  "El equilibrio entre la razón y la emoción es tu camino hacia el bienestar. Aprende a manejar el estrés con sabiduría emocional en lugar de suprimirlo.",
+    amor:   "Ofreces estabilidad emocional y madurez en tus relaciones. Tu capacidad de amar sin perder la ecuanimidad es un don; la persona adecuada lo reconoce y lo valora.",
+    dinero: "Tu madurez emocional te permite tomar decisiones financieras sin que el pánico o la euforia te dominen. Esa estabilidad interna es tu mejor ventaja en el mundo de los negocios."
+  },
+  "Ace of Swords": {
+    salud:  "La claridad mental es el primer paso hacia la salud. Corta con los pensamientos negativos que te limitan y adopta una perspectiva nueva y más honesta sobre tu bienestar.",
+    amor:   "La verdad, aunque incómoda, liberará tu vida amorosa. Di lo que piensas con respeto; una conversación honesta puede transformar completamente tu relación.",
+    dinero: "Una idea poderosa y clara tiene el potencial de abrir nuevas puertas. Confía en tu mente analítica y actúa con decisión; la claridad es tu mayor fortaleza económica."
+  },
+  "Two of Swords": {
+    salud:  "Estás evitando ver algo importante sobre tu salud. Bajar la guardia y enfrentar la situación con ojos abiertos te permitirá tomar las decisiones correctas.",
+    amor:   "Te encuentras en un punto de indecisión en el amor. Ninguna decisión también es una decisión; solo puedes avanzar cuando dejes de tapar los ojos ante la realidad.",
+    dinero: "Estás paralizado frente a una decisión financiera. Busca más información y no demores indefinidamente; el estancamiento también tiene un costo."
+  },
+  "Three of Swords": {
+    salud:  "El dolor emocional que cargas tiene efectos físicos reales. Busca un espacio seguro para procesar tus heridas; la sanación emocional es también sanación del cuerpo.",
+    amor:   "Hay una herida o decepción amorosa que necesita ser procesada. Atravesar el dolor con consciencia es el único camino hacia una nueva apertura del corazón.",
+    dinero: "Una pérdida o decepción económica reciente duele, pero no es definitiva. Procesa la situación, aprende de ella y reorganízate; el sufrimiento tiene un límite si actúas."
+  },
+  "Four of Swords": {
+    salud:  "Tu cuerpo y tu mente necesitan descanso urgente. Para completamente, no solo reduzcas el ritmo; el sueño profundo y la quietud son la medicina que más necesitas ahora.",
+    amor:   "Una pausa en tu vida amorosa no es una derrota. Tómate el tiempo para recuperar tu centro; solo desde la calma interior puedes construir vínculos saludables.",
+    dinero: "Antes de actuar en el plano económico, necesitas recuperar energía y perspectiva. Un período de pausa estratégica te dará la claridad que las decisiones importantes requieren."
+  },
+  "Five of Swords": {
+    salud:  "El conflicto interno o externo está costándote energía vital. Evalúa si vale la pena cada batalla que peleas; no toda guerra merece tu desgaste.",
+    amor:   "Ganar una discusión pero perder la conexión no es victoria. Reflexiona si el orgullo vale más que el amor; la paz a veces requiere ceder con sabiduría.",
+    dinero: "Cuidado con negocios o acuerdos donde no todos juegan con las mismas reglas. Actúa con ética y no a toda costa; una victoria deshonesta siempre tiene consecuencias."
+  },
+  "Six of Swords": {
+    salud:  "Estás saliendo lentamente de un período difícil. El proceso de recuperación lleva su tiempo; permite que la transición sea gradual y sin forzar el ritmo.",
+    amor:   "Te estás alejando de una situación emocional dolorosa hacia aguas más tranquilas. Permite que la distancia haga su trabajo sanador; la calma regresa.",
+    dinero: "Estás transitando desde la dificultad financiera hacia una situación más estable. El camino no es inmediato, pero estás avanzando en la dirección correcta."
+  },
+  "Seven of Swords": {
+    salud:  "Hay algo que estás evitando enfrentar en relación a tu salud. La evasión o los atajos raramente funcionan; la honestidad contigo mismo es el primer paso real.",
+    amor:   "Algo en tu vida amorosa no está siendo completamente honesto. La confianza es la base sin la cual ninguna relación puede sostenerse; busca esa verdad.",
+    dinero: "Cuidado con negocios que parecen demasiado buenos para ser verdad. Protege tus recursos e intereses con información y discernimiento."
+  },
+  "Eight of Swords": {
+    salud:  "Te sientes atrapado por creencias limitantes sobre tu salud. Muchas de las cadenas que sientes son mentales; con la ayuda adecuada, tienes más libertad de la que crees.",
+    amor:   "Estás atrapado en una situación amorosa más por miedo que por elección real. Recuerda que tienes más poder del que crees para cambiar tu realidad sentimental.",
+    dinero: "La sensación de no tener salida financiera es en parte una trampa mental. Busca perspectivas externas y asesórate; hay caminos que aún no puedes ver desde donde estás."
+  },
+  "Nine of Swords": {
+    salud:  "La ansiedad y los pensamientos catastróficos están afectando tu sueño y tu bienestar. Busca apoyo si el peso mental se vuelve demasiado; no tienes que cargarlo solo.",
+    amor:   "El miedo y la preocupación exagerada pueden estar saboteando tu vida amorosa. Lo que imaginas en la oscuridad suele ser peor que la realidad; habla, aclara, no supongas.",
+    dinero: "La angustia financiera es real pero puede estar amplificada por el miedo. Enfrenta los números con calma y busca asesoría; la claridad reduce el peso del problema."
+  },
+  "Ten of Swords": {
+    salud:  "Has llegado al punto más bajo de un ciclo difícil, y eso significa que la única dirección posible es hacia arriba. El amanecer llega después de la noche más oscura.",
+    amor:   "Un ciclo doloroso en el amor llega a su fin definitivo. Aunque duele, es también una liberación; de este cierre total nacerá la posibilidad de un nuevo comienzo genuino.",
+    dinero: "Una situación económica ha llegado a su punto límite. Acepta el cierre de este ciclo con valentía; la reconstrucción que viene puede ser más sólida que todo lo anterior."
+  },
+  "Page of Swords": {
+    salud:  "Investiga, pregunta y busca información sobre lo que afecta tu salud. El conocimiento es poder; no aceptes diagnósticos o situaciones sin buscar segunda opinión.",
+    amor:   "Hay curiosidad e inteligencia en tu aproximación al amor, pero también puede haber frialdad. Asegúrate de no solo analizar tus relaciones sino también sentirlas.",
+    dinero: "Investiga a fondo antes de comprometer dinero en cualquier proyecto. Tu mente analítica es tu mejor herramienta; úsala para detectar oportunidades y también riesgos."
+  },
+  "Knight of Swords": {
+    salud:  "Vas a toda velocidad y podrías estar ignorando las señales de tu cuerpo. Baja un poco el ritmo; la salud no es una batalla que ganar sino un proceso que respetar.",
+    amor:   "Tu intensidad e impulsividad pueden asustar a quienes te rodean. Antes de actuar en el amor, respira; no todas las situaciones requieren tu velocidad más alta.",
+    dinero: "La velocidad de decisión puede ser una ventaja, pero también un riesgo. Actúa con rapidez solo cuando tengas suficiente información; la impulsividad financiera sale cara."
+  },
+  "Queen of Swords": {
+    salud:  "Tu capacidad de ver la situación con claridad y sin autoengaño es un gran activo. Aplica esa lucidez a tu salud y toma decisiones informadas sin dejar que el miedo nuble el juicio.",
+    amor:   "Puedes amar profundamente y mantener tu independencia al mismo tiempo. No renuncies a tu claridad mental por amor; la pareja adecuada respetará y admirará tu agudeza.",
+    dinero: "Tu inteligencia analítica y tu capacidad de cortar lo innecesario son tus mayores fortalezas económicas. Toma decisiones con la cabeza fría y no dejes que las emociones dominen."
+  },
+  "King of Swords": {
+    salud:  "La disciplina intelectual aplicada a tu salud te dará resultados concretos. Investiga, analiza y construye un plan basado en evidencia; tu mente es tu mejor aliada.",
+    amor:   "La claridad y la comunicación directa son tu forma de amar. Asegúrate de que tu frialdad aparente no oculte la calidez que tienes dentro; los demás necesitan verla también.",
+    dinero: "Tu capacidad de análisis, planificación y decisión estratégica está en su punto máximo. Es momento de actuar con autoridad intelectual en tus asuntos financieros."
+  },
+  "Ace of Pentacles": {
+    salud:  "Una nueva oportunidad para mejorar tu bienestar físico se presenta. Es el momento ideal para comenzar ese plan de alimentación, rutina o tratamiento que has estado considerando.",
+    amor:   "Un amor estable, concreto y que se manifiesta en lo cotidiano está disponible. El amor también se expresa en acciones tangibles; valora lo que se construye día a día.",
+    dinero: "Una semilla de prosperidad real está lista para ser plantada. No la desperdicies; un nuevo proyecto, inversión o fuente de ingresos tiene potencial genuino ahora."
+  },
+  "Two of Pentacles": {
+    salud:  "Estás haciendo malabares con tu tiempo y energía. Priorizar el descanso y el autocuidado no es un lujo; es una necesidad para sostener todo lo demás.",
+    amor:   "El equilibrio entre tu vida personal, laboral y amorosa está siendo desafiado. Asegúrate de que tu relación no quede siempre en último lugar en tu lista de prioridades.",
+    dinero: "Gestionar múltiples responsabilidades económicas puede ser agotador. Organiza tus finanzas con un sistema claro; la adaptabilidad es tu fortaleza, úsala con orden."
+  },
+  "Three of Pentacles": {
+    salud:  "Trabajar en equipo con profesionales de la salud te dará mejores resultados. No intentes resolver todo solo; el conocimiento compartido acelera la recuperación.",
+    amor:   "Construir algo duradero con tu pareja requiere esfuerzo colaborativo. Los proyectos en común fortalecen el vínculo de maneras que el romance solo no puede.",
+    dinero: "La colaboración y el trabajo en equipo son la clave de tu éxito económico ahora. Busca alianzas donde cada parte aporte su expertise; el resultado conjunto supera al individual."
+  },
+  "Four of Pentacles": {
+    salud:  "El apego excesivo al control puede generar tensión en tu cuerpo. Aprende a soltar; la rigidez acumula estrés y la flexibilidad es también una forma de salud.",
+    amor:   "El miedo a perder puede estar haciendo que te aferres demasiado. En el amor, sostener con mano abierta es más poderoso que controlar; la libertad crea vínculos más fuertes.",
+    dinero: "La precaución financiera es sabia, pero el exceso de apego al dinero puede bloquear el flujo. Protege lo que tienes, pero no temas invertir; la riqueza también circula."
+  },
+  "Five of Pentacles": {
+    salud:  "Un período de escasez de energía o recursos para el cuidado personal puede estar afectándote. No estés solo en esto; busca apoyo, hay más ayuda disponible de lo que percibes.",
+    amor:   "La sensación de soledad o de estar excluido emocionalmente puede pesar mucho. Abre la puerta a quienes quieren acercarse; el aislamiento no tiene que ser permanente.",
+    dinero: "Las dificultades económicas actuales son temporales si buscas activamente el apoyo disponible. Recursos, ayuda y oportunidades existen; no las rechaces por orgullo."
+  },
+  "Six of Pentacles": {
+    salud:  "Hay un flujo generoso de apoyo disponible para tu salud. Tanto recibir ayuda como ofrecerla a otros crea un círculo virtuoso de bienestar.",
+    amor:   "El dar y recibir en tus relaciones está en equilibrio o puede estarlo. Asegúrate de que el amor sea una corriente de doble vía; ni solo dar ni solo tomar es sostenible.",
+    dinero: "La generosidad que das regresa multiplicada. Es momento de compartir tus recursos o conocimientos; también es un buen momento para recibir apoyo económico si lo necesitas."
+  },
+  "Seven of Pentacles": {
+    salud:  "Has invertido tiempo y esfuerzo en tu bienestar; ahora es momento de evaluar los resultados. Ajusta lo que no funciona y ten paciencia; los frutos de los buenos hábitos maduran lento.",
+    amor:   "Haz una pausa para evaluar el estado real de tu relación. ¿El esfuerzo que pones está dando los frutos que esperas? La reflexión honesta te indicará si seguir o redirigir.",
+    dinero: "Es momento de revisar tus inversiones y proyectos. ¿Están dando los resultados esperados? La paciencia es virtud, pero también debes saber cuándo ajustar el rumbo."
+  },
+  "Eight of Pentacles": {
+    salud:  "La dedicación constante a tus rutinas de bienestar da frutos reales. Sigue practicando con atención y cuidado; la maestría en el autocuidado se construye día a día.",
+    amor:   "El amor también requiere práctica y dedicación constante. Trabaja en ser mejor pareja cada día; los pequeños gestos repetidos son los que construyen las relaciones más duraderas.",
+    dinero: "La especialización y el perfeccionamiento de tus habilidades profesionales es la mejor inversión que puedes hacer ahora. El trabajo meticuloso y constante construye una reputación sólida."
+  },
+  "Nine of Pentacles": {
+    salud:  "Has cultivado una relación de autocuidado que merece ser celebrada. Disfruta de los frutos de tu disciplina; tu bienestar es el resultado de tus propias elecciones conscientes.",
+    amor:   "Eres completamente capaz de ser feliz desde tu propia plenitud. Cuando no necesitas al otro para estar bien, el amor que atraes y construyes es mucho más genuino y libre.",
+    dinero: "La independencia financiera que has construido con esfuerzo es real y valiosa. Disfruta de la abundancia que has generado; mereces los frutos de tu trabajo y disciplina."
+  },
+  "Ten of Pentacles": {
+    salud:  "El legado de bienestar que construyes impacta no solo en ti sino en quienes te rodean. Tus hábitos saludables son también un regalo para tu familia y entorno.",
+    amor:   "La culminación de un ciclo amoroso lleva a una estabilidad y riqueza emocional duradera. La familia, el hogar y los vínculos profundos son fuente de bienestar real.",
+    dinero: "La abundancia generacional y la estabilidad a largo plazo están dentro de tu alcance. Las decisiones que tomas hoy pueden construir un legado económico sólido para el futuro."
+  },
+  "Page of Pentacles": {
+    salud:  "El aprendizaje sobre nutrición, movimiento o salud preventiva te beneficiará enormemente. Sé curioso y disciplinado en aplicar lo que aprendes; los cambios pequeños acumulan grandes resultados.",
+    amor:   "Eres confiable, constante y práctico en el amor, y eso es un don. Un vínculo que comienza lento y con bases sólidas puede convertirse en algo profundamente duradero.",
+    dinero: "Es momento ideal para educarte en finanzas, inversiones o en las habilidades de tu campo profesional. Cada conocimiento adquirido ahora se convertirá en capital en el futuro."
+  },
+  "Knight of Pentacles": {
+    salud:  "La constancia y la disciplina son tus aliados más confiables para mejorar tu salud. Aunque el progreso parezca lento, cada pequeño paso en la dirección correcta suma.",
+    amor:   "Eres leal, confiable y estás dispuesto a construir algo duradero. Tu presencia segura y constante es un regalo invaluable para quien está a tu lado.",
+    dinero: "Tu enfoque metódico y tu compromiso con el trabajo bien hecho te llevarán a resultados sólidos. No busques atajos; la tortuga siempre llega más lejos que la liebre impulsiva."
+  },
+  "Queen of Pentacles": {
+    salud:  "Cuidas de todos los que te rodean con dedicación; recuerda cuidarte a ti con la misma prioridad. Tu bienestar es la base desde la cual puedes dar a los demás.",
+    amor:   "Tu capacidad de crear un entorno seguro, cálido y nutritivo es una de tus mayores fortalezas en el amor. La persona adecuada reconocerá y valorará profundamente ese don.",
+    dinero: "Tu inteligencia práctica para gestionar recursos es admirable. Combínala con la confianza en tu propia valía; mereces la prosperidad que eres capaz de crear y administrar."
+  },
+  "King of Pentacles": {
+    salud:  "Has construido hábitos sólidos que merecen ser sostenidos. La estabilidad y la constancia en tu rutina de bienestar son tu mayor capital físico; protégelo con sabiduría.",
+    amor:   "Ofreces seguridad, estabilidad y abundancia material en tus relaciones. Recuerda que la presencia emocional es tan importante como la provisión material; el amor también pide tiempo y escucha.",
+    dinero: "Estás en la cúspide de tu poder financiero. La combinación de experiencia, disciplina y visión práctica te permite construir riqueza duradera; confía en tu criterio y lidera con seguridad."
+  }
+};
+
+// ── Estado del carrusel ───────────────────────────────────────────────────
+let slideActual = 0;
+
+function moverCarrusel(dir) {
+  slideActual = (slideActual + dir + categorias.length) % categorias.length;
+  document.getElementById("carousel-track").style.transform = `translateX(-${slideActual * 100}%)`;
+  actualizarNav();
+}
+
+function irASlide(idx) {
+  slideActual = idx;
+  document.getElementById("carousel-track").style.transform = `translateX(-${slideActual * 100}%)`;
+  actualizarNav();
+}
+
+function actualizarNav() {
+  const etiquetas = ["Salud", "Amor", "Dinero"];
+  document.getElementById("indicador-texto").textContent =
+    `${etiquetas[slideActual]}  (${slideActual + 1} / ${categorias.length})`;
+  document.querySelectorAll(".dot").forEach((d, i) => {
+    d.classList.toggle("activo", i === slideActual);
+    d.setAttribute("aria-selected", i === slideActual ? "true" : "false");
+  });
+}
+
+// ── Construir slide ───────────────────────────────────────────────────────
+function construirSlide(cat, carta, intro) {
+  const slide = document.createElement("div");
+  slide.className = "slide";
+  slide.setAttribute("role", "tabpanel");
+  slide.setAttribute("aria-label", `Carta de ${cat.label}`);
+
+  const badge = document.createElement("span");
+  badge.className = `categoria-badge ${cat.badgeClass}`;
+  badge.textContent = `${cat.icono} ${cat.label}`;
+
+  const nombre = document.createElement("h3");
+  nombre.className = "nombre-carta";
+  nombre.textContent = carta.nameEs;
+
+  const img = document.createElement("img");
+  img.className = "carta-img";
+  img.src = carta.img;
+  img.alt = `Carta de tarot: ${carta.nameEs}`;
+  img.referrerPolicy = "no-referrer";
+  img.onerror = function () {
+    const err = document.createElement("div");
+    err.className = "img-error";
+    err.setAttribute("aria-label", "Imagen no disponible");
+    err.textContent = "🂠";
+    this.replaceWith(err);
+  };
+
+  const introEl = document.createElement("p");
+  introEl.className = "intro-mistica";
+  introEl.textContent = intro;
+
+  const recBloque = document.createElement("div");
+  recBloque.className = "recomendacion-bloque";
+
+  const recTitulo = document.createElement("span");
+  recTitulo.className = "recomendacion-titulo";
+  recTitulo.textContent = `✦ El oráculo te dice`;
+
+  const recTexto = document.createElement("p");
+  recTexto.className = "recomendacion-texto";
+  recTexto.textContent = recomendaciones[carta.name]?.[cat.id]
+    ?? "Cada carta guarda un mensaje único. Reflexiona sobre cómo este arquetipo se manifiesta en tu vida.";
+
+  recBloque.append(recTitulo, recTexto);
+  slide.append(badge, nombre, img, introEl, recBloque);
+  return slide;
+}
+
+// ── Lógica principal (sin dependencias externas) ──────────────────────────
+function iniciarTirada() {
+  const btn = document.getElementById("btn-consultar");
+  btn.disabled = true;
+  btn.textContent = "Las cartas se revelan...";
+
+  slideActual = 0;
+
+  const loader = document.getElementById("estado-loader");
+  const carouselArea = document.getElementById("carousel-area");
+
+  loader.style.display = "flex";
+  carouselArea.style.display = "none";
+  document.getElementById("seccion-regreso").style.display = "none";
+
+  // Pequeña pausa para mostrar el GIF animado
+  setTimeout(() => {
+    const cartas = barajar(MAZO).slice(0, 3);
+    const track = document.getElementById("carousel-track");
+    track.innerHTML = "";
+    document.getElementById("dots").innerHTML = "";
+    track.style.transform = "translateX(0%)";
+    slideActual = 0;
+
+    cartas.forEach((carta, i) => {
+      const cat   = categorias[i];
+      const intro = cat.intros[Math.floor(Math.random() * cat.intros.length)];
+      track.appendChild(construirSlide(cat, carta, intro));
+
+      const dot = document.createElement("button");
+      dot.className = "dot" + (i === 0 ? " activo" : "");
+      dot.setAttribute("role", "tab");
+      dot.setAttribute("aria-label", `Ir a carta ${i + 1}`);
+      dot.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      dot.onclick = () => irASlide(i);
+      document.getElementById("dots").appendChild(dot);
+    });
+
+    actualizarNav();
+    loader.style.display = "none";
+    carouselArea.style.display = "block";
+    btn.textContent = "Nueva Tirada";
+    btn.disabled = false;
+    document.getElementById("seccion-regreso").style.display = "block";
+  }, 1800);
+}
+
+// ── Botón de regreso ──────────────────────────────────────────────────────
+(function configurarRegreso() {
+  const URL_DESTINO = "https://salome-carta-natal.netlify.app";
+  const params = new URLSearchParams(window.location.search);
+  const volverUrl = params.get("volver");
+  const btnRegresar = document.getElementById("btn-regresar");
+
+  if (volverUrl) {
+    try {
+      btnRegresar.href = new URL(volverUrl).href;
+    } catch {
+      btnRegresar.href = URL_DESTINO;
+    }
+  } else {
+    btnRegresar.href = URL_DESTINO;
+  }
+  btnRegresar.target = "_blank";
+  btnRegresar.rel = "noopener noreferrer";
+})();
+</script>
+</body>
+</html>
